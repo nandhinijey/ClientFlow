@@ -4,24 +4,24 @@ ClientFlow is an internal full-stack client management tool designed to help bus
 
 ---
 
-## 🚀 Features
+## Features
 
-- 🔍 **Real-Time Search**  
+-  **Real-Time Search**  
   Search and filter clients instantly by name, email, phone number, or client ID — ideal for quick access and lookups.
 
-- 📋 **Client Dashboard**  
-  View a snapshot of all active and inactive clients with key data such as fee, category, and status. Designed with large clientele in mind.
+-  **Client Dashboard**  
+  View a snapshot of all active and inactive clients with key data such as fee, category, and status. Designed with a large clientele in mind.
 
-- ✏️ **Client Updates & Removalss**  
+-  **Client Updates & Removals**  
   Administrators can effortlessly update client details or remove outdated records through a robust backend API.
 
-- 💰 **Fee & Payment Tracking**  
+-  **Fee & Payment Tracking**  
   Track project fees and current payment status (`Pending` / `Paid`) at a glance, right from the dashboard.
 
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer       | Tech                          |
 |------------|-------------------------------|
