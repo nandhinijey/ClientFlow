@@ -38,7 +38,7 @@ app.post('/clients', async (req, res) => {
     const { name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus, clientStatus } = req.body;
     const result = await pool.query(
       `INSERT INTO Clients (name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus, clientStatus)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
       [name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus, clientStatus]
     );
     res.status(201).json(result.rows[0]);

@@ -1,10 +1,5 @@
 'use client';
-
 import { useEffect, useState } from 'react';
-import PrivateRoute from '@/app/components/PrivateRoute';
-
-import Link from 'next/link';
-
 
 type Client = {
   id: number;
@@ -12,18 +7,17 @@ type Client = {
   email: string;
   phone: string;
   address: string;
-  clientCategory: string;
-  businessName: string;
-  startDate: string;
-  endDate: string;
+  clientcategory: string;
+  businessname: string;
+  startdate: string;
+  enddate: string;
   fee: number;
-  paymentStatus: string;
-  clientStatus: string;
+  paymentstatus: string;
+  clientstatus: string;
 };
 
 export default function DashboardPage() {
   const [clients, setClients] = useState<Client[]>([]);
-  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -41,62 +35,64 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredClients = clients.filter((client) => {
-    const query = search.toLowerCase();
-    return (
-      client.name.toLowerCase().includes(query) ||
-      client.email.toLowerCase().includes(query) ||
-      client.phone.toLowerCase().includes(query) ||
-      client.id.toString().includes(query)
-    );
-  });
-
   return (
-    <PrivateRoute>
-      <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-    <h1 className="text-3xl font-bold">Client List</h1>
+    <div>
+      <h1 className="text-3xl font-bold mb-6">All Clients</h1>
 
-    <Link href="/dashboard/form">
-    <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-      Create New Client
-    </button>
-    </Link>
-    </div>
+      {loading && <p>Loading clients...</p>}
+      {error && <p className="text-red-600">{error}</p>}
+      {!loading && clients.length === 0 && (
+        <p className="text-gray-500">No clients found.</p>
+      )}
 
-
-        <input
-          type="text"
-          placeholder="Search by name, email, phone, or ID"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full mb-6 p-3 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-300"
-        />
-
-        {loading && <p>Loading clients...</p>}
-        {error && <p className="text-red-600">{error}</p>}
-        {!loading && filteredClients.length === 0 && (
-          <p className="text-gray-500">No matching clients found.</p>
-        )}
-
-        <div className="grid gap-4">
-          {filteredClients.map((client) => (
-            <div key={client.id} className="p-4 border rounded shadow bg-white">
-              <h2 className="text-xl font-semibold">{client.name}</h2>
-              <p>Email: {client.email}</p>
-              <p>Phone: {client.phone}</p>
-              <p>Business: {client.businessName}</p>
-              <p>Category: {client.clientCategory}</p>
-              <p>Fee: ${client.fee}</p>
-              <p>Client Status: {client.clientStatus}</p>
-              <p>Payment Status: {client.paymentStatus}</p>
-              <p className="text-sm text-gray-500">
-                {client.startDate} → {client.endDate}
-              </p>
-            </div>
-          ))}
-        </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border rounded shadow">
+          <thead>
+            <tr>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Email</th>
+              <th className="border p-2">Phone</th>
+              <th className="border p-2">Business</th>
+              <th className="border p-2">Category</th>
+              <th className="border p-2">Fee</th>
+              <th className="border p-2">Status</th>
+              <th className="border p-2">Payment</th>
+              <th className="border p-2">Start - End</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clients.map((client) => (
+              <tr key={client.id}>
+                <td className="border p-2">{client.name}</td>
+                <td className="border p-2">{client.email}</td>
+                <td className="border p-2">{client.phone}</td>
+                <td className="border p-2">{client.businessname}</td>
+                <td className="border p-2">{client.clientcategory}</td>
+                <td className="border p-2">${client.fee}</td>
+                <td className="border p-2">{client.clientstatus}</td>
+                <td className="border p-2">{client.paymentstatus}</td>
+                <td className="border p-2">
+                  {new Date(client.startdate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}{' '}
+                  →{' '}
+                  {client.enddate
+                    ? new Date(client.enddate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    : 'N/A'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </PrivateRoute>
+    </div>
   );
 }
+
+
