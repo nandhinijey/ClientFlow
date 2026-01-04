@@ -12,11 +12,14 @@ ClientFlow is an internal full-stack client management tool designed to help bus
 -  **Client Dashboard**  
   View a snapshot of all active and inactive clients with key data such as fee, category, and status. Designed with a large clientele in mind.
 
--  **Client Updates & Removals**  
+-  **Client Updates & Removalss**  
   Administrators can effortlessly update client details or remove outdated records through a robust backend API.
 
 -  **Fee & Payment Tracking**  
   Track project fees and current payment status (`Pending` / `Paid`) at a glance, right from the dashboard.
+
+-  **Excel Export**  
+  Implemented client-side Excel export using SheetJS, enabling users to download structured client data directly from the dashboard.
 
 
 ---

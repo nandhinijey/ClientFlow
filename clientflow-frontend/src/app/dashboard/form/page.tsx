@@ -18,6 +18,8 @@ export default function NewClientPage() {
     fee: '',
     paymentstatus: '',
     clientstatus: '',
+    hourssigned: '',
+    hoursused: '',
   });
 
   const [error, setError] = useState('');
@@ -34,12 +36,23 @@ export default function NewClientPage() {
 
   // Replace empty strings with null for optional fields
   const sanitizedData = {
-    ...formData,
+    name: formData.name,
+    email: formData.email,
+    phone: formData.phone,
     address: formData.address || null,
-    businessName: formData.businessname || null,
-    endDate: formData.enddate || null,
-    paymentStatus: formData.paymentstatus || null,
-    clientStatus: formData.clientstatus || null,
+    clientCategory: formData.clientcategory,        
+    businessName: formData.businessname || null,    
+    startDate: formData.startdate || null,                  
+    endDate: formData.enddate || null,    
+    fee: Number(formData.fee),
+    paymentStatus: formData.paymentstatus || null,  
+    clientStatus: formData.clientstatus || null,    
+    hourssigned: formData.hourssigned
+      ? Number(formData.hourssigned)
+      : null,
+    hoursused: formData.hoursused
+      ? Number(formData.hoursused)
+      : null,
   };
 
   try {
@@ -64,6 +77,8 @@ export default function NewClientPage() {
       fee: '',
       paymentstatus: '',
       clientstatus: '',
+      hourssigned: '',
+      hoursused: '',
     });
 
     setTimeout(() => router.push('/dashboard'), 1500);
@@ -88,9 +103,9 @@ export default function NewClientPage() {
           { label: 'Email', name: 'email', required: true },
           { label: 'Phone', name: 'phone', required: true },
           { label: 'Address', name: 'address', required: false },
-          { label: 'Business Name', name: 'businessName', required: false },
-          { label: 'Start Date', name: 'startDate', type: 'date', required: true },
-          { label: 'End Date', name: 'endDate', type: 'date', required: false },
+          { label: 'Business Name', name: 'businessname', required: false },
+          { label: 'Start Date', name: 'startdate', type: 'date', required: true },
+          { label: 'End Date', name: 'enddate', type: 'date', required: false },
           { label: 'Fee', name: 'fee', type: 'number', required: true },
         ].map(({ label, name, type = 'text', required }) => (
           <div key={name} className="flex flex-col">
@@ -115,8 +130,8 @@ export default function NewClientPage() {
             Client Category
           </label>
           <select
-            name="clientCategory"
-            id="clientCategory"
+            name="clientcategory"
+            id="clientcategory"
             value={formData.clientcategory}
             onChange={handleChange}
             required
@@ -136,8 +151,8 @@ export default function NewClientPage() {
             Payment Status
           </label>
           <select
-            name="paymentStatus"
-            id="paymentStatus"
+            name="paymentstatus"
+            id="paymentstatus"
             value={formData.paymentstatus}
             onChange={handleChange}
             className="p-2 border rounded"
@@ -153,8 +168,8 @@ export default function NewClientPage() {
             Client Status
           </label>
           <select
-            name="clientStatus"
-            id="clientStatus"
+            name="clientstatus"
+            id="clientstatus"
             value={formData.clientstatus}
             onChange={handleChange}
             className="p-2 border rounded"
@@ -163,6 +178,36 @@ export default function NewClientPage() {
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
           </select>
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="hourssigned" className="text-sm font-medium mb-1">
+            Consulting Hours Signed
+          </label>
+          <input
+            type="number"
+            id="hourssigned"
+            name="hourssigned"
+            value={formData.hourssigned}
+            onChange={handleChange}
+            placeholder="Hours Signed"
+            className="p-2 border rounded"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="hoursused" className="text-sm font-medium mb-1">
+            Consulting Hours Used
+          </label>
+          <input
+            type="number"
+            id="hoursused"
+            name="hoursused"
+            value={formData.hoursused}
+            onChange={handleChange}
+            placeholder="Hours Used"
+            className="p-2 border rounded"
+          />
         </div>
 
         <button

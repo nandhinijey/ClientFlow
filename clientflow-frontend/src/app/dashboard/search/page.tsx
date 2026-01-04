@@ -77,7 +77,7 @@ export default function DashboardPage() {
 
       <input
         type="text"
-        placeholder="Search by name, email, phone, or ID"
+        placeholder="Search by Name / Email / Phone"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full mb-6 p-3 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-300"

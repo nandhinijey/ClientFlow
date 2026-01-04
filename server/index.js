@@ -35,33 +35,130 @@ app.get('/clients/:id', async (req, res) => {
 // POST create a new client
 app.post('/clients', async (req, res) => {
   try {
-    const { name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus, clientStatus } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      address,
+      clientCategory,
+      businessName,
+      startDate,
+      endDate,
+      fee,
+      paymentStatus,
+      clientStatus,
+      hourssigned,
+      hoursused
+    } = req.body;
+
     const result = await pool.query(
-      `INSERT INTO Clients (name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus, clientStatus)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-      [name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus, clientStatus]
+      `INSERT INTO Clients (
+        name,
+        email,
+        phone,
+        address,
+        clientcategory,
+        businessname,
+        startdate,
+        enddate,
+        fee,
+        paymentstatus,
+        clientstatus,
+        hourssigned,
+        hoursused
+      )
+      VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+      )
+      RETURNING *`,
+      [
+        name,
+        email,
+        phone,
+        address,
+        clientCategory,
+        businessName,
+        startDate,
+        endDate,
+        fee,
+        paymentStatus,
+        clientStatus,
+        hourssigned,
+        hoursused
+      ]
     );
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // PUT update a client
 app.put('/clients/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus,clientStatus } = req.body;
+
+    const {
+      name,
+      email,
+      phone,
+      address,
+      clientCategory,
+      businessName,
+      startDate,
+      endDate,
+      fee,
+      paymentStatus,
+      clientStatus,
+      hourssigned,
+      hoursused
+    } = req.body;
+
     const result = await pool.query(
-      `UPDATE Clients SET name=$1, email=$2, phone=$3, address=$4, clientCategory=$5, businessName=$6, startDate=$7, endDate=$8, fee=$9, paymentStatus=$10, clientStatus=$11
-       WHERE id=$12 RETURNING *`,
-      [name, email, phone, address, clientCategory, businessName, startDate, endDate, fee, paymentStatus, clientStatus, id]
+      `UPDATE Clients SET
+        name = $1,
+        email = $2,
+        phone = $3,
+        address = $4,
+        clientcategory = $5,
+        businessname = $6,
+        startdate = $7,
+        enddate = $8,
+        fee = $9,
+        paymentstatus = $10,
+        clientstatus = $11,
+        hourssigned = $12,
+        hoursused = $13
+      WHERE id = $14
+      RETURNING *`,
+      [
+        name,
+        email,
+        phone,
+        address,
+        clientCategory,
+        businessName,
+        startDate,
+        endDate,
+        fee,
+        paymentStatus,
+        clientStatus,
+        hourssigned,
+        hoursused,
+        id
+      ]
     );
+
     res.json(result.rows[0]);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // DELETE a client
 app.delete('/clients/:id', async (req, res) => {

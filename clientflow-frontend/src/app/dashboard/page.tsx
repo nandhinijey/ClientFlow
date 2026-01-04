@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
 
 type Client = {
   id: number;
@@ -35,9 +36,46 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // ⭐ EXPORT FUNCTION
+  const exportToExcel = () => {
+    const formattedData = clients.map((client) => ({
+      Name: client.name,
+      Email: client.email,
+      Phone: client.phone,
+      Business: client.businessname,
+      Category: client.clientcategory,
+      Fee: client.fee,
+      Status: client.clientstatus,
+      Payment: client.paymentstatus,
+      StartDate: client.startdate
+        ? new Date(client.startdate).toLocaleDateString()
+        : '',
+      EndDate: client.enddate
+        ? new Date(client.enddate).toLocaleDateString()
+        : 'N/A',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Clients');
+
+    XLSX.writeFile(workbook, 'ClientFlow_Clients.xlsx');
+  };
+
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">All Clients</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">All Clients</h1>
+
+        {/* ⭐ EXPORT BUTTON */}
+        <button
+          onClick={exportToExcel}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Export as Excel
+        </button>
+      </div>
 
       {loading && <p>Loading clients...</p>}
       {error && <p className="text-red-600">{error}</p>}
@@ -94,5 +132,6 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 
 
