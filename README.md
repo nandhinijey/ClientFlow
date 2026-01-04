@@ -12,7 +12,7 @@ ClientFlow is an internal full-stack client management tool designed to help bus
 -  **Client Dashboard**  
   View a snapshot of all active and inactive clients with key data such as fee, category, and status. Designed with a large clientele in mind.
 
--  **Client Updates & Removalss**  
+-  **Client Updates & Removals**  
   Administrators can effortlessly update client details or remove outdated records through a robust backend API.
 
 -  **Fee & Payment Tracking**  
