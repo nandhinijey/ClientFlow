@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
   'http://localhost:3000',             
-  'https://YOUR-VERCEL-APP.vercel.app', // production frontend
+  'https://client-flow-puce.vercel.app/', // production frontend
 ];
 
 app.use(cors({
