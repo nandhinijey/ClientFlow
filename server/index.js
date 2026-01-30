@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import pool from './db.js';
+import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
@@ -10,6 +11,58 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+async function verifySupabaseToken(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null;
+
+    if (!token) {
+      return res.status(401).json({ error: 'Missing Authorization token' });
+    }
+
+    const { data, error } = await supabaseAdmin.auth.getUser(token);
+
+    if (error || !data?.user) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    const email = data.user.email?.toLowerCase();
+
+    if (!email) {
+      return res.status(401).json({ error: 'User email not found' });
+    }
+
+    const allowed = await pool.query(
+      'SELECT 1 FROM allowed_users WHERE email = $1',
+      [email]
+    );
+
+    if (allowed.rowCount === 0) {
+      return res.status(403).json({ error: 'User is not allowed' });
+    }
+
+    req.user = {
+      id: data.user.id,
+      email,
+    };
+
+    next();
+  } catch (err) {
+    console.error('Auth middleware error:', err);
+    return res.status(500).json({ error: 'Auth verification failed' });
+  }
+}
+
+
+app.use('/clients', verifySupabaseToken);
 
 // GET all clients
 app.get('/clients', async (req, res) => {

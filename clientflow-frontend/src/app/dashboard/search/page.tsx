@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { requireAuth } from '../../lib/requireAuth';
+
 
 type Client = {
   id: number;
@@ -26,18 +28,34 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('http://localhost:3000/clients')
-      .then((res) => {
+    const run = async () => {
+      const session = await requireAuth();
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:3000/clients', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
         if (!res.ok) throw new Error('Failed to fetch clients');
-        return res.json();
-      })
-      .then((data) => setClients(data))
-      .catch((err) => {
+
+        const data = await res.json();
+        setClients(data);
+      } catch (err) {
         console.error(err);
         setError('Failed to load clients');
-      })
-      .finally(() => setLoading(false));
-  }, []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    run();
+  }, [router]);
 
   const filteredClients = clients.filter((client) => {
     const query = search.toLowerCase();

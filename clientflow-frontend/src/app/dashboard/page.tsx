@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
+import { supabase } from '../lib/supabaseClient';
 
 type Client = {
   id: number;
@@ -18,23 +20,45 @@ type Client = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:3000/clients')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch clients');
-        return res.json();
-      })
-      .then((data) => setClients(data))
-      .catch((err) => {
-        console.error(err);
-        setError('Failed to load clients');
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const run = async () => {
+    // 1) Gate: must be logged in
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+
+    // 2) Only fetch clients if authenticated (WITH TOKEN)
+    try {
+      const res = await fetch('http://localhost:3000/clients', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch clients');
+
+      const data = await res.json();
+      setClients(data);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load clients');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  run();
+}, [router]);
+
 
   // ⭐ EXPORT FUNCTION
   const exportToExcel = () => {

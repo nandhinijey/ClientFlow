@@ -2,6 +2,10 @@
 
 import { useEffect, useState, FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import PrivateRoute from '@/app/components/PrivateRoute';
+import { supabase } from '../../../../lib/supabaseClient';
+
+
 
 type ClientApi = {
   id: number;
@@ -52,7 +56,18 @@ export default function EditClientPage() {
 
     const fetchClient = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/clients/${id}`);
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+        router.push('/login');
+        return;
+        }
+        const res = await fetch(`http://localhost:3000/clients/${id}`, {
+        headers: {
+            Authorization: `Bearer ${session.access_token}`,
+        },
+        });
+
         if (!res.ok) throw new Error('Failed to fetch client');
         const data: ClientApi = await res.json();
 
@@ -80,7 +95,7 @@ export default function EditClientPage() {
     };
 
     fetchClient();
-  }, [id]);
+  }, [id, router]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -94,9 +109,19 @@ export default function EditClientPage() {
     if (!form) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/clients/${id}`, {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+            router.push('/login');
+            return;
+        }
+
+        const res = await fetch(`http://localhost:3000/clients/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({
         name: form.name,
         email: form.email,
@@ -129,6 +154,7 @@ export default function EditClientPage() {
   if (!form) return <p>Client not found.</p>;
 
   return (
+      <PrivateRoute>
     <div>
     <h1 className="text-3xl font-bold mb-6">Edit Client</h1>
     <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
@@ -313,5 +339,6 @@ export default function EditClientPage() {
         </div>
     </form>
     </div>
+    </PrivateRoute>
   );
 }

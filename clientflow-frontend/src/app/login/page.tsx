@@ -2,22 +2,39 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../lib/supabaseClient';
+
+
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    // Replace with real secret check or env comparison
-    if (username === 'admin' && password === 'secret123') {
-      localStorage.setItem('loggedIn', 'true');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    // If session exists, you're logged in
+    if (data.session) {
       router.push('/dashboard');
     } else {
-      setError('Invalid credentials');
+      setError('Login failed. Please try again.');
     }
   };
 
@@ -28,10 +45,10 @@ export default function LoginPage() {
         {error && <p className="text-red-500 mb-2">{error}</p>}
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Email"
           className="w-full mb-4 p-2 border rounded"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
