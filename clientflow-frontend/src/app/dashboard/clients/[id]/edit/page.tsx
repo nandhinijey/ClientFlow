@@ -4,6 +4,8 @@ import { useEffect, useState, FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import PrivateRoute from '@/app/components/PrivateRoute';
 import { supabase } from '../../../../lib/supabaseClient';
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+
 
 
 
@@ -62,7 +64,8 @@ export default function EditClientPage() {
         router.push('/login');
         return;
         }
-        const res = await fetch(`http://localhost:3000/clients/${id}`, {
+        
+        const res = await fetch(`${API_URL}/clients/${id}`, {
         headers: {
             Authorization: `Bearer ${session.access_token}`,
         },
@@ -116,7 +119,7 @@ export default function EditClientPage() {
             return;
         }
 
-        const res = await fetch(`http://localhost:3000/clients/${id}`, {
+        const res = await fetch(`${API_URL}/clients/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',

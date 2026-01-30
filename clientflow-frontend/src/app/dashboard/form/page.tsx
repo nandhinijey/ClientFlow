@@ -65,7 +65,7 @@ export default function NewClientPage() {
       return;
     }
 
-    const res = await fetch('http://localhost:3000/clients', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

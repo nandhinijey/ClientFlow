@@ -36,7 +36,7 @@ export default function DashboardPage() {
       }
 
       try {
-        const res = await fetch('http://localhost:3000/clients', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients`, {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
@@ -76,9 +76,17 @@ export default function DashboardPage() {
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/clients/${id}`, {
-        method: 'DELETE',
-      });
+      const session = await requireAuth();
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
 
       if (!res.ok) throw new Error('Failed to delete client');
 

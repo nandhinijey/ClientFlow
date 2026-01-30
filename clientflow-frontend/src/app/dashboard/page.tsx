@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
     // 2) Only fetch clients if authenticated (WITH TOKEN)
     try {
-      const res = await fetch('http://localhost:3000/clients', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients`, {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
