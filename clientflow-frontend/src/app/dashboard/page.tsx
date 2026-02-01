@@ -27,40 +27,63 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-  const run = async () => {
-    // 1) Gate: must be logged in
-    const { data: { session } } = await supabase.auth.getSession();
+  let cancelled = false;
 
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-
-    // 2) Only fetch clients if authenticated (WITH TOKEN)
+  const fetchClients = async (token: string) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error('Failed to fetch clients');
+      if (!res.ok) throw new Error(`Failed to fetch clients: ${res.status}`);
 
       const data = await res.json();
-      setClients(data);
+      if (!cancelled) setClients(data);
     } catch (err) {
       console.error(err);
-      setError('Failed to load clients');
+      if (!cancelled) setError('Failed to load clients');
     } finally {
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     }
   };
 
+  const run = async () => {
+    // show loading while we determine session + fetch
+    setLoading(true);
+
+    // 1) Try immediately
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (cancelled) return;
+
+    if (session?.access_token) {
+      await fetchClients(session.access_token);
+      return;
+    }
+
+    // 2) If session isn't ready yet (common in prod), wait for hydration
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      sub.subscription.unsubscribe();
+
+      if (cancelled) return;
+
+      if (!newSession?.access_token) {
+        router.replace('/login');
+        return;
+      }
+
+      await fetchClients(newSession.access_token);
+    });
+  };
+
   run();
+
+  return () => {
+    cancelled = true;
+  };
 }, [router]);
 
 
-  // ⭐ EXPORT FUNCTION
   const exportToExcel = () => {
     const formattedData = clients.map((client) => ({
       Name: client.name,
@@ -91,8 +114,6 @@ export default function DashboardPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">All Clients</h1>
-
-        {/* ⭐ EXPORT BUTTON */}
         <button
           onClick={exportToExcel}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

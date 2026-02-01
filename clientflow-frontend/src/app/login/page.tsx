@@ -32,7 +32,8 @@ export default function LoginPage() {
 
     // If session exists, you're logged in
     if (data.session) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
+      router.refresh();
     } else {
       setError('Login failed. Please try again.');
     }
