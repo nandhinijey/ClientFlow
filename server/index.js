@@ -10,8 +10,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
-  'http://localhost:3000',             
-  'https://client-flow-puce.vercel.app/', // production frontend
+  'http://localhost:8000',         
+  'https://client-flow-puce.vercel.app', // production frontend
 ];
 
 app.use(cors({
