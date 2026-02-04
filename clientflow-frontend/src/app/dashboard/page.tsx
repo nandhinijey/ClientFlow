@@ -20,47 +20,88 @@ type Client = {
 };
 
 export default function DashboardPage() {
-  const router = useRouter();
-
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // purely for UI messaging
+  const [authStatus, setAuthStatus] = useState<
+    'unknown' | 'logged_in' | 'logged_out'
+  >('unknown');
+
   useEffect(() => {
-  const run = async () => {
-    // 1) Gate: must be logged in
-    const { data: { session } } = await supabase.auth.getSession();
+    let isMounted = true;
 
-    if (!session) {
-      router.push('/login');
-      return;
-    }
+    const fetchClients = async (accessToken?: string) => {
+      try {
+        setError('');
 
-    // 2) Only fetch clients if authenticated (WITH TOKEN)
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+        const headers: Record<string, string> = {};
+        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-      if (!res.ok) throw new Error('Failed to fetch clients');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clients`, {
+          headers,
+        });
 
-      const data = await res.json();
-      setClients(data);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to load clients');
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (!res.ok) {
+          // Don’t redirect. Just show error.
+          throw new Error(`Failed to fetch clients (${res.status})`);
+        }
 
-  run();
-}, [router]);
+        const data = await res.json();
+        if (isMounted) setClients(data);
+      } catch (err) {
+        console.error(err);
+        if (isMounted) setError('Failed to load clients');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    const run = async () => {
+      setLoading(true);
+
+      // Listen for auth changes (no redirects, just update UI + optionally refetch)
+      const { data: sub } = supabase.auth.onAuthStateChange(
+        async (_event, session) => {
+          if (!isMounted) return;
+
+          if (session?.access_token) {
+            setAuthStatus('logged_in');
+            // optional: refetch clients on login
+            await fetchClients(session.access_token);
+          } else {
+            setAuthStatus('logged_out');
+            // optional: clear sensitive data on logout
+            setClients([]);
+          }
+        }
+      );
+
+      // Initial load
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.access_token) {
+        if (isMounted) setAuthStatus('logged_in');
+        await fetchClients(session.access_token);
+      } else {
+        if (isMounted) setAuthStatus('logged_out');
+        // Still attempt fetch without token if you want “public/loose” behavior:
+        await fetchClients(undefined);
+      }
+
+      return () => sub.subscription.unsubscribe();
+    };
+
+    const cleanupPromise = run();
+
+    return () => {
+      isMounted = false;
+      cleanupPromise?.then((cleanup) => cleanup?.());
+    };
+  }, []);
 
 
-  // ⭐ EXPORT FUNCTION
   const exportToExcel = () => {
     const formattedData = clients.map((client) => ({
       Name: client.name,
@@ -92,7 +133,6 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">All Clients</h1>
 
-        {/* ⭐ EXPORT BUTTON */}
         <button
           onClick={exportToExcel}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
